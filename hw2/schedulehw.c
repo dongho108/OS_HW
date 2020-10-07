@@ -64,19 +64,21 @@ void initProcTable() {
 	int i;
 	for(i=0; i < NPROC; i++) {
 		procTable[i].id = i;
-		procTable[i].len = 0;
+		procTable[i].len = 0; // queue에서 크기를 위해
 		procTable[i].targetServiceTime = procServTime[i];
-		procTable[i].serviceTime = 0;
-		procTable[i].startTime = 0;
-		procTable[i].endTime = 0;
-		procTable[i].state = S_IDLE;
-		procTable[i].priority = 0;
-		procTable[i].saveReg0 = 0;
-		procTable[i].saveReg1 = 0;
-		procTable[i].prev = NULL;
-		procTable[i].next = NULL;
+		procTable[i].serviceTime = 0; // cpu사용하는 시간마다 --
+		procTable[i].startTime = 0; // 프로세스 생성될때 currentTime
+		procTable[i].endTime = 0; // 프로세스 끝날때 currentTime
+		procTable[i].state = S_IDLE; // 상황마다 바꿔주기
+		procTable[i].priority = 0; // 개런티때 사용
+		procTable[i].saveReg0 = 0; // ?
+		procTable[i].saveReg1 = 0; // ?
+		procTable[i].prev = NULL; // queue에서 순서정할때
+		procTable[i].next = NULL; // queue에서 순서정할때
 	}
 }
+
+
 
 void procExecSim(struct process *(*scheduler)()) {
 	int pid, qTime=0, cpuUseTime = 0, nproc=0, termProc = 0, nioreq=0;
@@ -96,11 +98,36 @@ void procExecSim(struct process *(*scheduler)()) {
 		compute(); 
 		
 		if (currentTime == nextForkTime) { /* CASE 2 : a new process created 프로세스 생성 */
+			//프로세스 생성
+			struct process *p;
+			p->id = procTable[pid].id;
+			p->len = procTable[pid].len; // queue에서 크기를 위해
+			p->targetServiceTime = procTable[pid].targetServiceTime;
+			p->serviceTime = procTable[pid].serviceTime; // cpu사용하는 시간마다 --
+			p->startTime = procTable[pid].startTime; // 프로세스 생성될때 currentTime
+			p->endTime = procTable[pid].endTime; // 프로세스 끝날때 currentTime
+			p->state = procTable[pid].state; // 상황마다 바꿔주기
+			p->priority = procTable[pid].priority; // 개런티때 사용
+			p->saveReg0 = procTable[pid].saveReg0; // ?
+			p->saveReg1 = procTable[pid].saveReg1; // ?
+			p->prev = procTable[pid].prev; // queue에서 순서정할때
+			p->next = procTable[pid].next; // queue에서 순서정할때
+
+			
 			//ready queue에 프로세스 넣기
-			readyQueue.next = procTable[pid].id;
+			
+
+			procTable[pid].startTime = currentTime;
+			procTable[pid].state = S_READY;
+		
+			readyQueue.next = ;
 			pid++;
-			readyQueue.len++;
+			
+			
 			//현재 Running process는 새로 생성된 프로세스 다음에 ready queue에 첨가
+
+			runningProc->state = S_READY;
+			readyQueue.next = runningProc;
 			//스케쥴링(ready -> running)
 			
 		}
